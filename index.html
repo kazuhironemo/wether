@@ -122,15 +122,15 @@
 
           html += `
 		<div>
-												<div>日付: ${formattedDate}</div>
-												<div>${data.list[i].weather[0].description}<img src="${icon}${data.list[i].weather[0].icon}.png"></div>
-												<div>気温: ${data.list[i].main.temp}℃</div>
-												<div>湿度: ${data.list[i].main.humidity}%</div>
-												<div>気圧: ${data.list[i].main.pressure}hPa</div>
-												<div>風速: ${windSpeed}m/s ${windArrow}</div>
-												<div>雨量: ${rain}mm[3時間]</div>
-												<br>
-										</div>
+				<div>日付: ${formattedDate}</div>
+				<div>${data.list[i].weather[0].description}<img src="${icon}${data.list[i].weather[0].icon}.png"></div>
+				<div>気温: ${data.list[i].main.temp}℃</div>
+				<div>湿度: ${data.list[i].main.humidity}%</div>
+				<div>気圧: ${data.list[i].main.pressure}hPa</div>
+				<div>風速: ${windSpeed}m/s ${windArrow}</div>
+				<div>雨量: ${rain}mm[3時間]</div>
+				<br>
+			</div>
 								`;
         }
         $("#view").empty().append(html);
