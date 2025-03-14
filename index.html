@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>open Weather map</title>
+    <style>
+      #view {
+        padding: 10px;
+        border: 5px solid #e8ddf3;
+        width: 91%;
+        background-color: rgb(203, 214, 224);
+        height: auto;
+        overflow: auto;
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+      }
+      img {
+        width: 80px;
+      }
+      #view > div {
+        border: 1px solid #3838ab; /* 罫線を追加 */
+        font-size: medium;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        flex: 1 1 calc(12.5% - 20px); /* 8列にする */
+        box-sizing: border-box;
+        padding: 10px; /* 内側の余白を追加 */
+      }
+      #view > div > div {
+        border-bottom: 1px solid #ccc; /* 各項目に罫線を追加 */
+        padding: 5px 0;
+      }
+      h2 {
+        font-size: x-large;
+        color: #f1071e;
+      }
+      .wind-direction {
+        display: inline-block;
+        transform: rotate(0deg);
+        font-size: x-large;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1><span id="area"></span> 天気5日間！</h1>
+      <div id="view"></div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script>
+      //＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+      //MAP表示処理
+      //＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+      const key = "62228a9a9f3efdde43ce6d66b6e99970"; //***自分のKEYを！！！！！！！！！！！！！！！***
+      const lat = "36.0124251"; //桶川の緯度
+      const lon = "139.575926"; //桶川の軽度
+      const icon = "http://openweathermap.org/img/wn/"; //ICONにアクセスするURL
+
+      //＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+      //OpenWeatherAPI（天気情報を取得）5DAY/3hour
+      //＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+
+      const url =
+        "https://api.openweathermap.org/data/2.5/forecast?lat=" +
+        lat +
+        "&lon=" +
+        lon +
+        "&appid=" +
+        key +
+        "&lang=ja&units=metric";
+
+      $.ajax({
+        url: url,
+        type: "get",
+        dataType: "json",
+        cache: false,
+      }).done(function (data) {
+        console.log(data);
+        $("#area").text(data.city.name);
+
+        let html = "";
+
+        for (let i = 0; i < 40; i++) {
+          //雨量がない場合は0とする
+          let rain = 0;
+          if (data.list[i].rain !== undefined) {
+            rain = data.list[i].rain["3h"];
+          }
+          // 日付を9時間後にする
+          let date = new Date(data.list[i].dt * 1000);
+          date.setHours(date.getHours() + 9);
+          let formattedDate = date
+            .toISOString()
+            .replace("T", " ")
+            .substring(5, 16);
+
+          // 風向きを矢印で表示
+          let windDirection = data.list[i].wind.deg + 90; // 表示する矢印が横向きなので90度ずらす
+          let windSpeed = data.list[i].wind.speed;
+          let windColor = "black"; // デフォルトの色
+
+          switch (true) {
+            case windSpeed >= 6:
+              windColor = "yellow";
+              break;
+            case windSpeed >= 10:
+              windColor = "red";
+              break;
+            case windSpeed >= 20:
+              windColor = "blue";
+              break;
+            case windSpeed >= 30:
+              windColor = "purple";
+              break;
+          }
+
+          let windArrow = `<span class="wind-direction" style="transform: rotate(${windDirection}deg); color: ${windColor};"> ➤</span>`;
+
+          html += `
+		<div>
+												<div>日付: ${formattedDate}</div>
+												<div>${data.list[i].weather[0].description}<img src="${icon}${data.list[i].weather[0].icon}.png"></div>
+												<div>気温: ${data.list[i].main.temp}℃</div>
+												<div>湿度: ${data.list[i].main.humidity}%</div>
+												<div>気圧: ${data.list[i].main.pressure}hPa</div>
+												<div>風速: ${windSpeed}m/s ${windArrow}</div>
+												<div>雨量: ${rain}mm[3時間]</div>
+												<br>
+										</div>
+								`;
+        }
+        $("#view").empty().append(html);
+      });
+    </script>
+  </body>
+</html>
